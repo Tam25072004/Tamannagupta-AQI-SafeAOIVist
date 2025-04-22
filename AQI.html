@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Page with Flex Containers</title>
+    <!-- Add Font Awesome CDN for icons -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <style>
+ .smart-planner{
+        max-width: 300px;
+    }
+    
+    
+    /* Form Styling */
+    form label {
+      font-weight: 600;
+      margin-top: 10px;
+      display: block;
+    }
+    
+    select, button {
+      width: 100%;
+      padding: 10px 14px;
+      margin-top: 6px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      transition: border 0.3s;
+    }
+    
+    select:focus, button:focus {
+      border-color: #007BFF;
+      outline: none;
+    }
+    
+    /* Button Style */
+    .smart-planner button {
+      background-color: #007BFF;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100px;
+      margin-top: 20px;
+      transition: background 0.3s;
+    }
+    
+    .smart-planner button:hover {
+      background-color: #0056b3;
+    }
+    
+    /* Result Box */
+    #planner-result {
+      margin-top: 20px;
+      border-radius: 10px;
+      padding: 18px;
+      font-size: 1rem;
+      transition: all 0.4s ease-in-out;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    /* AQI Badge */
+    .alert-success strong {
+      color: #28a745;
+    }
+    
+    .alert-warning strong {
+      color: #ffc107;
+    }
+    
+    .alert-danger strong {
+      color: #dc3545;
+    }
+    
+    /* Subtle animation */
+    @keyframes fadeInSlide {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    #planner-result {
+      animation: fadeInSlide 0.5s ease-in-out;
+    }
+
+         #visitTimeBox {
+      background: #fef8f5;
+      padding: 15px;
+      border-radius: 12px;
+      max-width: 400px;
+      margin: 20px auto;
+      font-family: sans-serif;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+  
+    #visitTimeBox select, #visitTimeBox button {
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+  
+    #visitTimeBox button {
+      background-color: #fd9644;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100px;
+    }
+  
+    #visitSuggestion li {
+      margin-bottom: 5px;
+    }
+         #recommendationBox {
+      background: #f0f8ff;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
+      max-width: 400px;
+      margin: 30px auto;
+      text-align: center;
+      font-family: 'Segoe UI', sans-serif;
+    }
+  
+    #recommendationBox h2 {
+      margin-bottom: 10px;
+      color: #2c3e50;
+    }
+  
+    #recommendationBox select {
+      padding: 10px;
+      width: 80%;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      margin-top: 8px;
+      margin-bottom: 15px;
+      font-size: 16px;
+    }
+  
+    #recommendationBox button {
+      padding: 10px 20px;
+      width:200px;
+      margin-left: 5px;
+      background-color: #00b894;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  
+    #recommendationBox button:hover {
+      background-color: #019875;
+    }
+  
+    #suggestionResult {
+      margin-top: 15px;
+      background: #e9f7ef;
+      padding: 15px;
+      border-radius: 10px;
+      color: #2d572c;
+      font-weight: bold;
+    }
+        .map-legend {
+          background: white;
+          padding: 10px;
+          font-size: 14px;
+          line-height: 1.4em;
+          box-shadow: 0 0 10px rgba(0,0,0,0.3);
+          border-radius: 8px;
+        }
+        .map-legend span {
+          display: inline-block;
+          width: 12px;
+          height: 12px;
+          margin-right: 6px;
+          border-radius: 50%;
+        }
+        </style>
+     <link rel="stylesheet " href="AQIstyle.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+      
+      .scrolling-container {
+            width: 100%;
+            background-color: #333;
+            overflow: hidden;
+            white-space: nowrap;
+            height:70px;
+        }
+
+        /* Style for the text inside the container */
+        .scrolling-text {
+            display: inline-block;
+            color: white;
+            font-size: 24px;
+            padding: 2px 0;
+            animation: scroll-left 27s linear infinite;
+        }
+
+        /* Animation to scroll the text from right to left */
+        @keyframes scroll-left {
+            0% {
+                transform: translateX(0%);
+            }
+            100% {
+                transform: translateX(-100%);
+            }
+        }  
+  
+        #chat-icon {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    background-color: #007BFF;
+    color: white;
+    padding: 14px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 24px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    z-index: 999;
+  }
+
+  #chatbot-container {
+    position: fixed;
+    bottom: 90px;
+    right: 25px;
+    max-width: 400px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    padding: 20px;
+    font-family: 'Segoe UI', sans-serif;
+    z-index: 999;
+  }
+
+  #chat-window {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  #chat-log {
+    min-height: 150px;
+    max-height: 250px;
+    overflow-y: auto;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background: #f9f9f9;
+    white-space: pre-wrap;
+  }
+
+  #user-input {
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    flex-grow: 1;
+    width:200px;
+  }
+
+  #chatbot-container button {
+    padding: 10px 15px;
+    border-radius: 10px;
+    border: none;
+    width: 50px;
+    margin-left: 0px;
+    background-color: #007BFF;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  #chatbot-container te
+
+  #chatbot-container button:hover {
+    background-color: #0056b3;
+  }
+       
+    </style>
+</head>
+<body>
+
+    <!-- Header Section -->
+    <header>
+        <h1>SafeAQIVisit</h1>
+    </header>
+   
+    <div class="collapsible" id="collapsible">
+        <!-- Image container inside the collapsible div -->
+        <div class="image-container">
+            <img src="https://media.istockphoto.com/id/1906226760/photo/good-air-quality-outdoors-hand-holding-a-magnifying-glass-to-check-the-good-air-quality-at.webp?a=1&b=1&s=612x612&w=0&k=20&c=wG_6DhImGzSwrcgzDWEijqSQOLYG3CqVkGS8QbFAZZQ=" alt="Image 1">
+            <img src="https://media.istockphoto.com/id/2194806118/photo/young-asian-woman-wearing-respiratory-mask-protect-and-filter-pm-or-particulate-matter.webp?a=1&b=1&s=612x612&w=0&k=20&c=3DQv1TKJIkt-i8WVQCQwanrB5i0f2sIOqZy94xotHwY=" alt="Image 2">
+            <img src="https://media.istockphoto.com/id/1297765213/photo/positive-woman-in-face-mask-walking-outdoors.jpg?s=612x612&w=0&k=20&c=OjT1a6MSc92QmUKgTCXw4qwjBk4GSlRoo4SC_ObXS4c=" alt="Image 3">
+        </div>
+    </div>
+    
+    <!-- Button to toggle the visibility of the images -->
+    <button onclick="document.getElementById('collapsible').classList.toggle('expand')">CLICK ME!!!!!!!!!!</button>
+    <!-- Navbar Section -->
+    <div class="scrolling-container">
+        <div class="scrolling-text">
+            <pre>🌍 Breathe Easy: Real-Time AQI Updates for Top Tourist Spots!                🏖️ Planning a Trip? Check the Air Quality First!                    🌿 Fresh Air or Smog? Know Before You Go!         🌎 Stay Safe: Track Air Pollution Levels for Your Next Destination         ☀️ Explore Smart: Real-Time Air Quality Insights for Travelers         🚗 Travel Wisely: AQI Index for Every Adventure                  🏕️ Adventure with Confidence: Check Air Quality Before You Travel            🌬️ Know the Air You Breathe: Tourist Destination AQI Reports                   🏞️ Clear Skies or Hazy Views? Get AQI Reports Instantly!</pre>
+
+
+        </div>
+    </div>
+    <nav>
+        <ul>
+            <li><a href="AQI.html" class="home-icon"><i class="fas fa-home"></i></a></li> 
+            <li><a href="#">About</a></li>
+            <li><a href="#">Services</a></li>
+            <li><a href="#">Contact</a></li>
+        </ul>
+    </nav>
+
+    <!-- Box Containers Section -->
+    <div class="container">
+        <!-- Box 1 -->
+        <div class="box">
+            <img src="https://media.istockphoto.com/id/1345570628/photo/hindu-temple-in-new-delhi-india.webp?a=1&b=1&s=612x612&w=0&k=20&c=rdKH2xGdmxXhJ0xum5EGeb1QOebEmNETyXm7BEYNq2c=" alt="Image 1">
+            <div>
+                <a href="Akshardham.html">Akshardham</a>
+                
+                <a href="Akshardham.html">View</a>
+                
+            </div>
+        </div>
+
+        <!-- Box 2 -->
+        <div class="box">
+            <img src="https://images.unsplash.com/photo-1582450724147-0ee17201a14c?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8TG90dXMlMjBUZW1wbGV8ZW58MHx8MHx8fDA%3D" alt="Image 2">
+            <div>
+                <a href="Lotus.html">Lotus Temple</a>
+                <a href="Lotus.html">View</a>
+            </div>
+        </div>
+
+        <!-- Box 3 -->
+        <div class="box">
+            <img src="https://media.istockphoto.com/id/486884726/photo/iskcon-temple-new-delhi-cngltrv1109.webp?a=1&b=1&s=612x612&w=0&k=20&c=iXhpdjBjWSsVm2cbVdBTPRRiNcdseBv45eToU5cSSBM=" alt="Image 3">
+            <div>
+                <a href="IskonTemple.html">Iskon Temple</a>
+                <a href="IskonTemple.html">View</a>
+            </div>
+        </div>
+
+        <!-- Box 4 -->
+        <div class="box">
+            <img src="https://media.istockphoto.com/id/941818526/photo/india-gate-a-war-memorial-in-new-delhi-india.jpg?s=1024x1024&w=is&k=20&c=2d3mZvJnSjXeuq3cXkkpILLtLeGQO2OZeRjI0QyKou0=" alt="Image 4">
+            <div>
+                <a href="IndiaGate.html">India Gate</a>
+                <a href="IndiaGate.html">View</a>
+            </div>
+        </div>
+
+        <!-- Box 5 -->
+        <div class="box">
+            <img src="https://media.istockphoto.com/id/465770597/photo/steam-locomotive.webp?a=1&b=1&s=612x612&w=0&k=20&c=Ox0oj0_-Q3OJYf1PrVaHTCEPKR9g2Mu_TwATglQjv1o=" alt="Image 5">
+            <div>
+                <a href="Railway.html">Rail Meuseum</a>
+                <a href="Railway.html">View</a>
+            </div>
+        </div>
+
+        <!-- Box 6 -->
+        <div class="box">
+            <img src="https://media.istockphoto.com/id/2183293361/photo/purana-qila-is-one-of-the-oldest-forts-in-delhi-india-built-by-the-second-mughal-emperor.webp?a=1&b=1&s=612x612&w=0&k=20&c=Ghh9q-mlpz8NHT4soQyA9mBQFSHTJom1cmMZOJ8s4yY=" alt="Image 6">
+            <div>
+                <a href="Purana.html">Purana Qila</a>
+                <a href="Purana.html">View</a>
+            </div>
+        </div>
+    </div>
+    <aside>
+        <button class="close-btn" id="closeBtn">×</button>
+        <br>
+        <h3>Watch Our Latest Video</h3><br>
+        <video controls>
+            <source src="https://www.w3schools.com/html/movie.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video><br>
+        <br>
+        <div class="container">
+            <p>Visit my latest website <a href="main.html">DecorTendor</a> for making decoration easy and classy.</p>
+        </div>
+    </aside>
+    
+    <footer>
+        <p>&copy; 2025 My Website | All Rights Reserved</p>
+    </footer>
+ <script>
+    document.getElementById("closeBtn").addEventListener("click", function() {
+            const aside = document.querySelector("aside");
+            aside.style.display = "none"; // Hides the aside section
+        });
+ </script>
+ <div class="s" style="display: flex;" >
+ <div id="recommendationBox">
+    <h2>🧠 Smart Travel Suggestion</h2>
+    <p>Pick your vibe and we’ll suggest a cleaner place based on AQI!</p>
+  
+    <label for="preferenceSelect">🌟 Choose a category:</label>
+    <select id="preferenceSelect">
+      <option value="nature">🌳 Nature</option>
+      <option value="heritage">🏛️ Heritage</option>
+      <option value="urban">🏙️ Urban</option>
+      <option value="food">🍜 Foodie</option>
+      <option value="beaches">🏖️ Beaches</option>
+      <option value="mountains">⛰️ Mountains</option>
+      <option value="wildlife">🦁 Wildlife</option>
+      <option value="spiritual">🕉️ Spiritual</option>
+    </select>
+  
+    <button onclick="recommendDestinations()">✨ Suggest</button>
+  
+    <div id="suggestionResult"></div>
+  </div>
+  
+    
+<script>
+    const destination = [
+  // Nature
+  { name: "Rishikesh", type: "nature", state: "Uttarakhand", aqi: 42 },
+  { name: "Coorg", type: "nature", state: "Karnataka", aqi: 50 },
+  { name: "Wayanad", type: "nature", state: "Kerala", aqi: 47 },
+
+  // Heritage
+  { name: "Hampi", type: "heritage", state: "Karnataka", aqi: 72 },
+  { name: "Mahabalipuram", type: "heritage", state: "Tamil Nadu", aqi: 68 },
+  { name: "Orchha", type: "heritage", state: "Madhya Pradesh", aqi: 65 },
+
+  // Urban
+  { name: "Gangtok", type: "urban", state: "Sikkim", aqi: 43 },
+  { name: "Pune", type: "urban", state: "Maharashtra", aqi: 75 },
+  { name: "Chandigarh", type: "urban", state: "Punjab", aqi: 70 },
+
+  // Foodie
+  { name: "Amritsar", type: "food", state: "Punjab", aqi: 82 },
+  { name: "Pondicherry", type: "food", state: "Tamil Nadu", aqi: 55 },
+  { name: "Lucknow", type: "food", state: "Uttar Pradesh", aqi: 89 },
+
+  // Beaches
+  { name: "Gokarna", type: "beaches", state: "Karnataka", aqi: 49 },
+  { name: "Varkala", type: "beaches", state: "Kerala", aqi: 38 },
+  { name: "Diu", type: "beaches", state: "Daman & Diu", aqi: 60 },
+
+  // Mountains
+  { name: "Manali", type: "mountains", state: "Himachal Pradesh", aqi: 44 },
+  { name: "Tawang", type: "mountains", state: "Arunachal Pradesh", aqi: 35 },
+  { name: "Auli", type: "mountains", state: "Uttarakhand", aqi: 40 },
+
+  // Wildlife
+  { name: "Kaziranga", type: "wildlife", state: "Assam", aqi: 39 },
+  { name: "Bandipur", type: "wildlife", state: "Karnataka", aqi: 50 },
+  { name: "Pench", type: "wildlife", state: "Madhya Pradesh", aqi: 58 },
+
+  // Spiritual
+  { name: "Bodh Gaya", type: "spiritual", state: "Bihar", aqi: 62 },
+  { name: "Auroville", type: "spiritual", state: "Tamil Nadu", aqi: 41 },
+  { name: "Pushkar", type: "spiritual", state: "Rajasthan", aqi: 70 }
+];
+function recommendDestinations() {
+  const selected = document.getElementById('preferenceSelect').value;
+  const goodOptions = destination.filter(d => d.type === selected && d.aqi < 80);
+
+  let message = "";
+
+  if (goodOptions.length > 0) {
+    const pick = goodOptions[Math.floor(Math.random() * goodOptions.length)];
+    message = `✨ Try <b>${pick.name}</b> in ${pick.state}. It has cleaner air (AQI: ${pick.aqi}) and fits your vibe!`;
+  } else {
+    message = `😕 Couldn't find a clean option right now for that preference. Try again soon!`;
+  }
+
+  document.getElementById('suggestionResult').innerHTML = message;
+}
+
+</script> 
+<div id="visitTimeBox">
+    <h3>📅 Best Time to Visit</h3>
+    <label>Select a Destination:</label>
+    <select id="destinationSelect">
+      <option value="Manali">Manali</option>
+      <option value="Lakshadweep">Lakshadweep</option>
+      <option value="Darjeeling">Darjeeling</option>
+      <option value="Auli">Auli</option>
+      <option value="Pondicherry">Pondicherry</option>
+      <option value="Shillong">Shillong</option>
+      <option value="Udaipur">Udaipur</option>
+      <option value="Munnar">Munnar</option>
+      <option value="Coorg">Coorg</option>
+      <option value="Rishikesh">Rishikesh</option>
+    </select>
+    <button onclick="showBestTime()">📌 Show Best Months</button>
+  
+    <div id="visitSuggestion" style="margin-top: 10px;"></div>
+  </div>
+<script>
+    const bestTimeData = {
+  "Manali": {
+    state: "Himachal Pradesh",
+    monthlyData: {
+      "March": { aqi: 40, weather: "Pleasant & clear" },
+      "June": { aqi: 60, weather: "Cool & lush" },
+      "October": { aqi: 38, weather: "Breezy autumn" }
+    }
+  },
+  "Coorg": {
+    state: "Karnataka",
+    monthlyData: {
+      "February": { aqi: 42, weather: "Fresh & misty" },
+      "July": { aqi: 48, weather: "Monsoon lushness" },
+      "November": { aqi: 41, weather: "Post-rain greenery" }
+    }
+  },
+  "Rishikesh": {
+    state: "Uttarakhand",
+    monthlyData: {
+      "March": { aqi: 55, weather: "Cool & peaceful" },
+      "April": { aqi: 52, weather: "Warm but breathable" },
+      "September": { aqi: 50, weather: "Fresh river air" }
+    }
+  },
+  "Udaipur": {
+    state: "Rajasthan",
+    monthlyData: {
+      "November": { aqi: 65, weather: "Cool & scenic" },
+      "December": { aqi: 62, weather: "Festive and crisp" },
+      "February": { aqi: 60, weather: "Clear skies & lakes" }
+    }
+  },
+  "Munnar": {
+    state: "Kerala",
+    monthlyData: {
+      "January": { aqi: 35, weather: "Cool & tea-scented" },
+      "August": { aqi: 40, weather: "Green & cloudy" },
+      "October": { aqi: 42, weather: "Misty & romantic" }
+    }
+  },
+  "Shillong": {
+    state: "Meghalaya",
+    monthlyData: {
+      "March": { aqi: 30, weather: "Fresh mountain air" },
+      "June": { aqi: 35, weather: "Rainy & dreamy" },
+      "November": { aqi: 38, weather: "Chilly & clean" }
+    }
+  },
+  "Pondicherry": {
+    state: "Tamil Nadu",
+    monthlyData: {
+      "January": { aqi: 45, weather: "Sea breeze & clear" },
+      "February": { aqi: 43, weather: "Sunny & fresh" },
+      "December": { aqi: 48, weather: "Cool beach weather" }
+    }
+  },
+  "Auli": {
+    state: "Uttarakhand",
+    monthlyData: {
+      "January": { aqi: 25, weather: "Snowy & fresh" },
+      "February": { aqi: 28, weather: "Cold & clear" },
+      "March": { aqi: 30, weather: "Snowmelt views" }
+    }
+  },
+  "Darjeeling": {
+    state: "West Bengal",
+    monthlyData: {
+      "April": { aqi: 40, weather: "Cool & misty" },
+      "June": { aqi: 45, weather: "Lush monsoon" },
+      "October": { aqi: 42, weather: "Clear & breezy" }
+    }
+  },
+  "Lakshadweep": {
+    state: "Union Territory",
+    monthlyData: {
+      "January": { aqi: 28, weather: "Pristine air & calm sea" },
+      "March": { aqi: 30, weather: "Clear & warm" },
+      "November": { aqi: 29, weather: "Post-monsoon bliss" }
+    }
+  }
+};
+
+function showBestTime() {
+  const place = document.getElementById("destinationSelect").value;
+  const data = bestTimeData[place];
+
+  if (data) {
+    const recommendations = Object.entries(data.monthlyData).map(([month, stats]) => {
+      return `<li><b>${month}</b>: AQI ${stats.aqi} - ${stats.weather}</li>`;
+    }).join("");
+
+    document.getElementById("visitSuggestion").innerHTML = `
+      <p>📍 <b>${place}</b>, ${data.state}</p>
+      <ul style="text-align:left; padding-left:20px;">${recommendations}</ul>
+    `;
+  } else {
+    document.getElementById("visitSuggestion").innerText = "No data available.";
+  }
+}
+
+</script>
+<div class="smart-planner" style="margin-top: 30px; padding: 20px; border: 1px solid #ccc; border-radius: 10px;">
+    <h3>📆 Smart Destination Planner</h3>
+    <label>Month:</label>
+    <select id="month">
+      <option>January</option><option>February</option><option>March</option>
+      <option>April</option><option>May</option><option>June</option>
+      <option>July</option><option>August</option><option>September</option>
+      <option>October</option><option>November</option><option>December</option>
+    </select>
+  
+    <label>Region:</label>
+    <select id="region" >
+      <option>North</option>
+      <option>South</option>
+      <option>East</option>
+      <option>West</option>
+    </select>
+  
+    <label>Preference:</label>
+    <select id="preference">
+      <option>Hills</option>
+      <option>Beaches</option>
+      <option>Temples</option>
+      <option>Wildlife</option>
+    </select>
+  
+    <button onclick="recommendDestination()">Find My Destination</button>
+  
+    <div id="planner-result" style="margin-top: 15px; font-weight: bold;"></div>
+  </div>
+  <script>
+    // const apiKey = "0e45b1368135719d2c6f3635bcbc7d8c";  // 🔁 Replace with your OpenWeatherMap API Key
+    
+    const destinations = [
+      { name: "Manali", region: "North", preference: "Hills", bestMonths: ["April", "May", "June", "October"], lat: 32.2396, lon: 77.1887 },
+      { name: "Goa", region: "West", preference: "Beaches", bestMonths: ["November", "December", "January"], lat: 15.2993, lon: 74.1240 },
+      { name: "Rishikesh", region: "North", preference: "Temples", bestMonths: ["March", "April", "October"], lat: 30.0869, lon: 78.2676 },
+      { name: "Kodaikanal", region: "South", preference: "Hills", bestMonths: ["April", "May", "June"], lat: 10.2381, lon: 77.4892 },
+      { name: "Kaziranga National Park", region: "East", preference: "Wildlife", bestMonths: ["February", "March"], lat: 26.5775, lon: 93.1711 },
+      { name: "Mahabalipuram", region: "South", preference: "Temples", bestMonths: ["December", "January", "February"], lat: 12.6208, lon: 80.1931 },
+    ];
+    
+    async function fetchAQI(lat, lon) {
+      const url = `https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${apiKey}`;
+      const response = await fetch(url);
+      const data = await response.json();
+      return data.list[0].main.aqi;
+    }
+    
+    function getAQILevel(aqi) {
+      const levels = ["Good", "Fair", "Moderate", "Poor", "Very Poor"];
+      return levels[aqi - 1];
+    }
+    
+    async function recommendDestination() {
+      const month = document.getElementById("month").value;
+      const region = document.getElementById("region").value;
+      const preference = document.getElementById("preference").value;
+      const resultBox = document.getElementById("planner-result");
+    
+      if (!month || !region || !preference) {
+        resultBox.className = "alert alert-warning mt-4";
+        resultBox.textContent = "Please select all options.";
+        resultBox.classList.remove("d-none");
+        return;
+      }
+    
+      const filtered = destinations.filter(d =>
+        d.region === region &&
+        d.preference === preference &&
+        d.bestMonths.includes(month)
+      );
+    
+      if (filtered.length === 0) {
+        resultBox.className = "alert alert-danger mt-4";
+        resultBox.textContent = "❌ No matching destination found. Try different filters.";
+        resultBox.classList.remove("d-none");
+        return;
+      }
+    
+      const spot = filtered[Math.floor(Math.random() * filtered.length)];
+      const aqi = await fetchAQI(spot.lat, spot.lon);
+      const aqiLevel = getAQILevel(aqi);
+    
+      let badgeClass = "success";
+      if (aqi === 3) badgeClass = "warning";
+      else if (aqi >= 4) badgeClass = "danger";
+    
+      resultBox.className = `alert alert-${badgeClass} mt-4`;
+      resultBox.innerHTML = `
+        ✅ <strong>${spot.name}</strong> is a great match!<br>
+        📅 Ideal for: <strong>${preference}</strong> during <strong>${month}</strong><br>
+        🌍 Region: <strong>${region}</strong><br>
+        🌫️ Current AQI: <strong>${aqi}</strong> (${aqiLevel})
+      `;
+      resultBox.classList.remove("d-none");
+    }
+    </script>
+      
+</div>   
+<div id="chat-icon" onclick="toggleChatbot()">💬</div>
+
+<!-- Chatbot Container -->
+<div id="chatbot-container" style="display: none;">
+  <div id="chat-window">
+    <div id="chat-log"></div>
+    <div style="display: flex; gap: 5px;">
+      <input type="text" id="user-input" placeholder="Ask about travel..." onkeydown="handleKey(event)" />
+      <button onclick="handleChat()">Send</button>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+  const destination1 = [
+    { name: "Manali", aqi: 45, month: "July", type: "hill" },
+    { name: "Rishikesh", aqi: 60, month: "July", type: "hill" },
+    { name: "Pondicherry", aqi: 40, month: "December", type: "beach" },
+    { name: "Leh", aqi: 35, month: "August", type: "hill" },
+    { name: "Agra", aqi: 120, month: "October", type: "historic" },
+    { name: "Coorg", aqi: 30, month: "June", type: "romantic" },
+    { name: "Munnar", aqi: 28, month: "June", type: "romantic" },
+    { name: "Nainital", aqi: 40, month: "July", type: "romantic" },
+  ];
+
+  function handleChat() {
+    const inputElem = document.getElementById("user-input");
+    const input = inputElem.value.toLowerCase().trim();
+    let response = "🤖 Sorry, I didn't get that.";
+    if (["hi", "hello", "hey"].some(greet => input.includes(greet))) {
+       response = "👋 Hello there! How can I help you with travel or AQI info today?";
+    } else if (input.includes("good morning")) {
+       response = "☀️ Good morning! Ready to explore some amazing destinations?";
+    } else if (input.includes("good evening")) {
+       response = "🌆 Good evening! Looking for places to visit?";
+    } else if (input.includes("bye")) {
+      response = "👋 Goodbye! Have a great day and safe travels!";
+    } else if (input.includes("thank")) {
+       response = "😊 You're welcome! Let me know if you need anything else.";
+    } 
+    else if (input.includes("july")) {
+      const julyPlaces = destination1.filter(d => d.month.toLowerCase() === "july");
+      response = "🌄 Places to visit in July:\n" + julyPlaces.map(p => `- ${p.name} (AQI ${p.aqi})`).join("\n");
+    } else if (input.includes("aqi") && input.includes("below")) {
+      const threshold = parseInt(input.match(/\d+/));
+      const cleanPlaces = destination1.filter(d => d.aqi < threshold);
+      response = `🌱 Destinations with AQI below ${threshold}:\n` + cleanPlaces.map(p => `- ${p.name} (AQI ${p.aqi})`).join("\n");
+    } else if (input.includes("hill")) {
+      const hills = destination1.filter(d => d.type === "hill");
+      response = "🏞️ Peaceful hill stations:\n" + hills.map(p => `- ${p.name} (AQI ${p.aqi})`).join("\n");
+    } else if (input.includes("romantic")) {
+      const romantic = destination1.filter(d => d.type === "romantic");
+      response = "💕 Romantic spots with low AQI:\n" + romantic.map(p => `- ${p.name} (AQI ${p.aqi})`).join("\n");
+    }
+   
+
+    document.getElementById("chat-log").innerText += `\n🧑‍💼 You: ${input}\n${response}\n`;
+    inputElem.value = "";
+    document.getElementById("chat-log").scrollTop = document.getElementById("chat-log").scrollHeight;
+  }
+
+  function handleKey(event) {
+    if (event.key === "Enter") {
+      handleChat();
+    }
+  }
+
+  function toggleChatbot() {
+    const bot = document.getElementById("chatbot-container");
+    bot.style.display = bot.style.display === "none" ? "block" : "none";
+  }
+</script>
+
+      
+ <div id="map" style="height: 500px;"></div>
+
+    
+ <script>
+  
+ const apiKey = '0e45b1368135719d2c6f3635bcbc7d8c'; // Replace with your OpenWeather API key
+ 
+ const touristPlaces = [
+   { name: "India Gate", lat: 28.6129, lon: 77.2295 },
+   { name: "Red Fort", lat: 28.6562, lon: 77.2410 },
+   { name: "Qutub Minar", lat: 28.5244, lon: 77.1855 },
+   { name: "Lotus Temple", lat: 28.5535, lon: 77.2588 },
+   { name: "Humayun's Tomb", lat: 28.5933, lon: 77.2507 },
+   { name: "Akshardham Temple", lat: 19.0760, lon: 72.8777 },
+   { name: "Rail Meuseum", lat: 28.5856, lon: 77.1802 },
+   { name: "Purana Qila", lat: 28.6187, lon: 77.2432 },
+ 
+ ];
+ 
+ function getAQIColor(aqi) {
+   if (aqi === 1) return 'green';
+   if (aqi === 2) return 'yellowgreen';
+   if (aqi === 3) return 'orange';
+   if (aqi === 4) return 'red';
+   if (aqi === 5) return 'purple';
+   return 'gray';
+ }
+ 
+ const map = L.map('map').setView([28.6139, 77.2090], 11);
+ 
+ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+   attribution: '© OpenStreetMap contributors'
+ }).addTo(map);
+ 
+ // Fetch AQI for each tourist place and show marker
+ touristPlaces.forEach(place => {
+   const url = `https://api.openweathermap.org/data/2.5/air_pollution?lat=${place.lat}&lon=${place.lon}&appid=${apiKey}`;
+ 
+   fetch(url)
+     .then(response => response.json())
+     .then(data => {
+       const aqi = data.list[0].main.aqi;
+       const color = getAQIColor(aqi);
+       const category = ['Good', 'Fair', 'Moderate', 'Poor', 'Very Poor'][aqi - 1];
+ 
+       const marker = L.circleMarker([place.lat, place.lon], {
+         radius: 10,
+         color: color,
+         fillColor: color,
+         fillOpacity: 0.8
+       }).addTo(map);
+ 
+       marker.bindPopup(`<b>${place.name}</b><br>AQI: ${aqi} (${category})`);
+     })
+     .catch(err => console.error(`Error fetching AQI for ${place.name}:`, err));
+ });
+ 
+ // Add AQI Legend
+ const legend = L.control({ position: "bottomleft" });
+ 
+ legend.onAdd = function () {
+   const div = L.DomUtil.create("div", "map-legend");
+   div.innerHTML += `<strong>🟢 AQI Scale</strong><br>`;
+   div.innerHTML += `<span style="background:green;"></span> Good (1)<br>`;
+   div.innerHTML += `<span style="background:yellowgreen;"></span> Fair (2)<br>`;
+   div.innerHTML += `<span style="background:orange;"></span> Moderate (3)<br>`;
+   div.innerHTML += `<span style="background:red;"></span> Poor (4)<br>`;
+   div.innerHTML += `<span style="background:purple;"></span> Very Poor (5)<br>`;
+   return div;
+ };
+ legend.addTo(map);
+ </script>
+ 
+     </script>
+     
+</body>
+</html>
